@@ -40,3 +40,8 @@ export interface FlowUpdateRequest {
   id: string;
   flow: FlowConfig;
 }
+
+export interface FlowRunRequest {
+  id: string;
+  input: string;
+}

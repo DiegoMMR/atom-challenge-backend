@@ -1,4 +1,4 @@
-import { FlowUpdateRequest } from "../../types/flow";
+import { FlowRunRequest, FlowUpdateRequest } from "../../types/flow";
 import { FastifyPluginAsync } from "fastify";
 import { FlowController } from "./controller";
 
@@ -28,6 +28,22 @@ export const flowRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(response);
     } catch (error) {
       request.log.error(error, "Error handling flow update route");
+      return reply
+        .status(500)
+        .send({ error: "Failed to handle flow update route" });
+    }
+  });
+
+  fastify.post("/run", async (request, reply) => {
+    try {
+      const body = request.body as FlowRunRequest;
+      const flowId = body.id;
+      const input = body.input;
+
+      const response = await flowController.runFlow(flowId, input);
+      return reply.send(response);
+    } catch (error) {
+      request.log.error(error, "Error handling flow run route");
       return reply
         .status(500)
         .send({ error: "Failed to handle flow update route" });

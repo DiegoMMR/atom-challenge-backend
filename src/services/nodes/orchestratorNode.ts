@@ -5,6 +5,7 @@ import { MemoryNode } from "./memoryNode";
 export interface OrchestratorNodeInput {
   prompt: string;
   context?: string;
+  nodes: { id: string }[];
 }
 
 export interface OrchestratorNodeOutput {
@@ -21,7 +22,7 @@ const agents: AgentDefinition[] = [
     handles: ["falta información", "datos incompletos"],
   },
   {
-    id: "catalog-specialist",
+    id: "specialist",
     description: "Gestiona consultas del catálogo de vehículos",
     handles: ["autos", "precios", "disponibilidad", "SUV", "sedán"],
   },
@@ -61,9 +62,10 @@ const ensureValidDecision = (
   };
 };
 
-export const orchestrator = async ({
+export const handleOrchestratorNode = async ({
   prompt,
   context,
+  nodes,
 }: OrchestratorNodeInput): Promise<OrchestratorNodeOutput> => {
   const normalizedPrompt = prompt.trim();
 
@@ -73,6 +75,9 @@ export const orchestrator = async ({
 
   const memoryNode = new MemoryNode();
   const conversationId = "default-conversation";
+  const availableAgents = agents.filter((agent) =>
+    nodes.some((node: { id: string }) => node.id.includes(agent.id)),
+  );
 
   memoryNode.saveMessage(conversationId, {
     role: "user",
@@ -83,7 +88,7 @@ export const orchestrator = async ({
   const decision = await runOrchestrator({
     prompt: normalizedPrompt,
     context,
-    availableAgents: agents,
+    availableAgents: availableAgents,
   });
 
   memoryNode.saveMessage(conversationId, {
@@ -92,5 +97,5 @@ export const orchestrator = async ({
     timestamp: Date.now(),
   });
 
-  return ensureValidDecision(decision, agents);
+  return ensureValidDecision(decision, availableAgents);
 };

@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from "fastify";
-import { orchestrator } from "../../services/nodes/orchestratorNode";
 import { handleSpecialistAgent } from "../../services/nodes/specialistAgentNode";
 import { handleGenericAgent } from "../../services/nodes/genericAgentNode";
 
@@ -22,36 +21,6 @@ export const testRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.status(500).send({ error: "Failed to handle test route" });
     }
   });
-
-  fastify.post<{ Body: OrchestratorTestBody }>(
-    "/orchestrator",
-    async (request, reply) => {
-      try {
-        const { prompt, context } = request.body;
-
-        if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
-          return reply
-            .status(400)
-            .send({ error: "El campo prompt es obligatorio" });
-        }
-
-        const decision = await orchestrator({
-          prompt,
-          context,
-        });
-
-        return reply.send({
-          input: { prompt, context },
-          output: decision,
-        });
-      } catch (error) {
-        request.log.error(error, "Error handling orchestrator test route");
-        return reply
-          .status(500)
-          .send({ error: "No se pudo ejecutar el orquestador" });
-      }
-    },
-  );
 
   fastify.post<{ Body: OrchestratorTestBody }>(
     "/faq",

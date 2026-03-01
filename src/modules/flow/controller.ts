@@ -5,6 +5,7 @@ import { FlowConfig, NodeType } from "../../types/flow";
 import { handleGenericAgent } from "../../services/nodes/genericAgentNode";
 import { handleSpecialistAgent } from "../../services/nodes/specialistAgentNode";
 import { handleValidatorAgent } from "../../services/nodes/validatorAgentNode";
+import { handleOrchestratorNode } from "../../services/nodes/orchestratorNode";
 
 export class FlowController {
   private service = new FlowService();
@@ -13,6 +14,7 @@ export class FlowController {
     if (type === "generic") return handleGenericAgent;
     if (type === "specialist") return handleSpecialistAgent;
     if (type === "validator") return handleValidatorAgent;
+    if (type === "orchestrator") return handleOrchestratorNode;
   };
 
   async createFlow(data: FlowConfig) {
@@ -45,7 +47,7 @@ export class FlowController {
     }
   }
 
-  async runFlow(id: string) {
+  async runFlow(id: string, input: string) {
     try {
       const flowId = id;
       const flow = await this.service.getFlow(flowId);
