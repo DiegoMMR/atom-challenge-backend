@@ -5,6 +5,7 @@ import helmet from '@fastify/helmet';
 import { env } from './config/envConfig';
 
 import { flowRoutes } from './modules/flow/routes';
+import { testRoutes } from './modules/test/routes';
 
 const fastify = Fastify({ logger: true });
 
@@ -18,6 +19,7 @@ const start = async () => {
     await fastify.register(helmet);
 
     await fastify.register(flowRoutes, { prefix: '/flow' });
+    await fastify.register(testRoutes, { prefix: '/test' });
 
     await fastify.listen({ port: env.PORT, host: '0.0.0.0' });
   } catch (err) {
