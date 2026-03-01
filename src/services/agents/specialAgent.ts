@@ -1,5 +1,6 @@
 import { googleAI } from "@genkit-ai/google-genai";
 import { genkit, z } from "genkit";
+import { Message } from "../../types/memory";
 
 import { faqTool } from "../tools/faqTool";
 import { vehiclesTool } from "../tools/vehiclesTool";
@@ -16,6 +17,22 @@ const ai = genkit({
 
 const specialAgentInputSchema = z.object({
   prompt: z.string().describe("Pregunta del usuario"),
+  messages: z
+    .array(
+      z.object({
+        role: z
+          .enum(["user", "model"])
+          .describe('Rol del mensaje, puede ser "user" o "model"'),
+        content: z.string().describe("Contenido del mensaje"),
+        timestamp: z
+          .number()
+          .describe("Marca de tiempo del mensaje en formato UNIX"),
+      }),
+    )
+    .optional()
+    .describe(
+      "Historial de mensajes anteriores en la conversación, si es relevante para proporcionar una respuesta más precisa",
+    ),
   context: z
     .string()
     .optional()
@@ -42,16 +59,29 @@ export const specialAgent = ai.defineFlow(
       prompt: userPrompt,
       system: systemPrompt,
       tools: [faqTool(ai), vehiclesTool(ai), datesSlotsTool(ai)],
+      ...(input.messages
+        ? {
+            messages: input.messages.map((msg) => ({
+              ...msg,
+              content: [{ text: msg.content }],
+            })),
+          }
+        : {}),
     });
 
     return text;
   },
 );
 
-export async function runSpecialAgent(prompt: string, context?: string) {
+export async function runSpecialAgent(
+  prompt: string,
+  context?: string,
+  messages: Message[] = [],
+) {
   const response = await specialAgent({
     prompt,
     context,
+    messages,
   });
 
   return response;

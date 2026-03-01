@@ -2,6 +2,7 @@ import { googleAI } from "@genkit-ai/google-genai";
 import { genkit, z } from "genkit";
 
 import { AgentDefinition } from "../../types/agent";
+import { Message } from "../../types/memory";
 
 const MODEL_NAME = "gemini-2.5-flash";
 
@@ -20,6 +21,22 @@ const AgentSchema = z.object({
 
 const OrchestratorInputSchema = z.object({
   prompt: z.string().describe("Mensaje actual del usuario"),
+  messages: z
+    .array(
+      z.object({
+        role: z
+          .enum(["user", "model"])
+          .describe('Rol del mensaje, puede ser "user" o "model"'),
+        content: z.string().describe("Contenido del mensaje"),
+        timestamp: z
+          .number()
+          .describe("Marca de tiempo del mensaje en formato UNIX"),
+      }),
+    )
+    .optional()
+    .describe(
+      "Historial de mensajes anteriores en la conversación, si es relevante para proporcionar una mejor decisión de enrutamiento",
+    ),
   context: z
     .string()
     .optional()
@@ -39,6 +56,7 @@ const OrchestratorOutputSchema = z.object({
 
 type RunOrchestratorInput = {
   prompt: string;
+  messages?: Message[];
   context?: string;
   availableAgents: AgentDefinition[];
 };
@@ -81,6 +99,14 @@ const orchestratorFlow = ai.defineFlow(
       system: generateSystemPrompt(input.availableAgents),
       prompt: userPrompt,
       output: { schema: OrchestratorOutputSchema },
+      ...(input.messages
+        ? {
+            messages: input.messages.map((msg) => ({
+              ...msg,
+              content: [{ text: msg.content }],
+            })),
+          }
+        : {}),
     });
 
     if (!output) {

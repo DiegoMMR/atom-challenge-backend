@@ -1,5 +1,6 @@
 import { googleAI } from "@genkit-ai/google-genai";
 import { genkit, z } from "genkit";
+import { Message } from "../../types/memory";
 
 const MODEL_NAME = "gemini-2.5-flash";
 
@@ -17,6 +18,22 @@ export const validatorAgent = ai.defineFlow(
     name: "validatorAgent",
     inputSchema: z.object({
       prompt: z.string().describe("Pregunta del usuario"),
+      messages: z
+        .array(
+          z.object({
+            role: z
+              .enum(["user", "model"])
+              .describe('Rol del mensaje, puede ser "user" o "model"'),
+            content: z.string().describe("Contenido del mensaje"),
+            timestamp: z
+              .number()
+              .describe("Marca de tiempo del mensaje en formato UNIX"),
+          }),
+        )
+        .optional()
+        .describe(
+          "Historial de mensajes anteriores en la conversación, si es relevante para proporcionar una respuesta más precisa",
+        ),
       context: z
         .string()
         .optional()
@@ -35,15 +52,28 @@ export const validatorAgent = ai.defineFlow(
     const { text } = await ai.generate({
       prompt: userPrompt,
       system: systemPrompt,
+      ...(input.messages
+        ? {
+            messages: input.messages.map((msg) => ({
+              ...msg,
+              content: [{ text: msg.content }],
+            })),
+          }
+        : {}),
     });
     return text;
   },
 );
 
-export async function runValidatorAgent(prompt: string, context?: string) {
+export async function runValidatorAgent(
+  prompt: string,
+  context?: string,
+  messages: Message[] = [],
+) {
   const response = await validatorAgent({
     prompt,
     context,
+    messages,
   });
   return response;
 }

@@ -1,10 +1,15 @@
 import { AgentDefinition } from "../../types/agent";
 import { runOrchestrator } from "../agents/orchestratorAgent";
+import { MemoryNode } from "./memoryNode";
+
+const memoryNode = new MemoryNode();
+const DEFAULT_CONVERSATION_ID = "default-conversation";
 
 export interface OrchestratorNodeInput {
   prompt: string;
   context?: string;
   nodes: { id: string }[];
+  conversationId?: string;
 }
 
 export interface OrchestratorNodeOutput {
@@ -65,6 +70,7 @@ export const handleOrchestratorNode = async ({
   prompt,
   context,
   nodes,
+  conversationId = DEFAULT_CONVERSATION_ID,
 }: OrchestratorNodeInput): Promise<OrchestratorNodeOutput> => {
   const normalizedPrompt = prompt.trim();
 
@@ -75,10 +81,12 @@ export const handleOrchestratorNode = async ({
   const availableAgents = agents.filter((agent) =>
     nodes.some((node: { id: string }) => node.id.includes(agent.id)),
   );
+  const messages = await memoryNode.getConversationHistory(conversationId);
 
   const decision = await runOrchestrator({
     prompt: normalizedPrompt,
     context,
+    messages,
     availableAgents: availableAgents,
   });
 
