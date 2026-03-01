@@ -1,9 +1,9 @@
 import { FastifyPluginAsync } from 'fastify';
 
 export const flowRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.get('/flow', async (request, reply) => {
+  fastify.get('/', async (request, reply) => {
     try {
-     const response = {
+      const response = {
         message: 'Hello from the flow route!',
         timestamp: new Date().toISOString(),
       };

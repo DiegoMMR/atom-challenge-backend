@@ -17,7 +17,7 @@ const start = async () => {
 
     await fastify.register(helmet);
 
-    await fastify.register(flowRoutes);
+    await fastify.register(flowRoutes, { prefix: '/flow' });
 
     await fastify.listen({ port: env.PORT, host: '0.0.0.0' });
   } catch (err) {
