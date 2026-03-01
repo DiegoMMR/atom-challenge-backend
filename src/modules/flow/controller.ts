@@ -79,6 +79,7 @@ export class FlowController {
       let currentNode: INodeConfig = initNodes[0];
       let currentInput = input;
       let finalOutput = input;
+      const originalUserInput = input;
 
       const maxSteps = Math.max(flow.length * 3, 10);
       let stepCount = 0;
@@ -155,6 +156,7 @@ export class FlowController {
         if (currentNode.typeNode === "orchestrator") {
           const decision = (await handler({
             prompt: currentInput,
+            context: originalUserInput,
             nodes: nextCandidates.map((node) => ({ id: node.id })),
           })) as OrchestratorNodeOutput;
 
@@ -184,7 +186,10 @@ export class FlowController {
           continue;
         }
 
-        const output = (await handler(currentInput)) as string;
+        const output = (await handler(
+          currentInput,
+          originalUserInput,
+        )) as string;
         finalOutput = output;
 
         const nextNode = nextCandidates[0];
