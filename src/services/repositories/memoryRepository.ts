@@ -1,3 +1,4 @@
+import { db } from "../../config/firebase";
 import { Message } from "../../types/memory";
 
 export interface IMemoryRepository {
@@ -8,11 +9,9 @@ export interface IMemoryRepository {
 
 export class MemoryRepository implements IMemoryRepository {
   private static instance: MemoryRepository;
-  private memory: Map<string, Message[]>;
+  private collection = db.collection("memory");
 
-  private constructor() {
-    this.memory = new Map<string, Message[]>();
-  }
+  private constructor() {}
 
   public static getInstance(): MemoryRepository {
     if (!MemoryRepository.instance) {
@@ -25,20 +24,44 @@ export class MemoryRepository implements IMemoryRepository {
     conversationId: string,
     message: Message,
   ): Promise<void> {
-    const history = this.memory.get(conversationId) || [];
-    history.push(message);
-    this.memory.set(conversationId, history);
+    const conversationRef = this.collection.doc(conversationId);
+
+    await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(conversationRef);
+      const existingMessages =
+        (snapshot.data()?.messages as Message[] | undefined) || [];
+
+      transaction.set(
+        conversationRef,
+        {
+          conversationId,
+          messages: [...existingMessages, message],
+          updatedAt: new Date(),
+        },
+        { merge: true },
+      );
+    });
   }
 
   public async getConversationHistory(
     conversationId: string,
   ): Promise<Message[]> {
-    return this.memory.get(conversationId) || [];
+    const snapshot = await this.collection.doc(conversationId).get();
+
+    if (!snapshot.exists) {
+      return [];
+    }
+
+    const messages = (snapshot.data()?.messages as Message[] | undefined) || [];
+
+    return [...messages].sort(
+      (first, second) => first.timestamp - second.timestamp,
+    );
   }
 
   public async deleteConversationHistory(
     conversationId: string,
   ): Promise<void> {
-    this.memory.delete(conversationId);
+    await this.collection.doc(conversationId).delete();
   }
 }
