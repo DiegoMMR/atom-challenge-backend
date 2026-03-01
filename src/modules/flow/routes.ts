@@ -1,4 +1,4 @@
-import { FlowConfig } from "../../types/flow";
+import { FlowUpdateRequest } from "../../types/flow";
 import { FastifyPluginAsync } from "fastify";
 import { FlowController } from "./controller";
 
@@ -19,8 +19,11 @@ export const flowRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.post("/update", async (request, reply) => {
     try {
-      const flowId = "quiZ6ky9euPmSFAPN36O";
-      const updateData = request.body as FlowConfig;
+      const body = request.body as FlowUpdateRequest;
+
+      const flowId = body.id;
+      const updateData = body.flow;
+
       const response = await flowController.updateFlow(flowId, updateData);
       return reply.send(response);
     } catch (error) {

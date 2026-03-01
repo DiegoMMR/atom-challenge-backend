@@ -35,3 +35,8 @@ export interface INodeConfig {
 export interface FlowConfig {
   nodes: INodeConfig[];
 }
+
+export interface FlowUpdateRequest {
+  id: string;
+  flow: FlowConfig;
+}
