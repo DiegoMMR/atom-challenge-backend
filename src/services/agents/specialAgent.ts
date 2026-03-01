@@ -1,12 +1,13 @@
 import { googleAI } from "@genkit-ai/google-genai";
 import { genkit, z } from "genkit";
 import { Message } from "../../types/memory";
+import { env } from "../../config/envConfig";
 
 import { faqTool } from "../tools/faqTool";
 import { vehiclesTool } from "../tools/vehiclesTool";
 import { datesSlotsTool } from "../tools/datesSlotsTool";
 
-const MODEL_NAME = "gemini-2.5-flash";
+const MODEL_NAME = env.GEMINI_MODEL;
 
 const ai = genkit({
   plugins: [googleAI()],

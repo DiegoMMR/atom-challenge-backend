@@ -1,5 +1,21 @@
 # Atom Challenge Backend
 
+## Variables de entorno
+
+Configura un archivo `.env` en la raíz del proyecto con estas variables:
+
+```env
+PORT=3000
+ALLOW_ORIGIN=http://localhost:5173
+GEMINI_API_KEY=tu_api_key
+GEMINI_MODEL=gemini-2.5-flash
+FIREBASE_PROJECT_ID=tu_project_id
+FIREBASE_CLIENT_EMAIL=tu_client_email
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+```
+
+`GEMINI_MODEL` se usa como modelo por defecto para todos los agentes (`generic`, `orchestrator`, `specialist`, `validator`).
+
 ## Ejecutar servidor
 
 ```bash

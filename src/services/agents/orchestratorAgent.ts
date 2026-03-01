@@ -3,8 +3,9 @@ import { genkit, z } from "genkit";
 
 import { AgentDefinition } from "../../types/agent";
 import { Message } from "../../types/memory";
+import { env } from "../../config/envConfig";
 
-const MODEL_NAME = "gemini-2.5-flash";
+const MODEL_NAME = env.GEMINI_MODEL;
 
 const ai = genkit({
   plugins: [googleAI()],
