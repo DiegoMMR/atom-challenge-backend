@@ -1,6 +1,5 @@
 import { AgentDefinition } from "../../types/agent";
 import { runOrchestrator } from "../agents/orchestratorAgent";
-import { MemoryNode } from "./memoryNode";
 
 export interface OrchestratorNodeInput {
   prompt: string;
@@ -73,28 +72,14 @@ export const handleOrchestratorNode = async ({
     throw new Error("El prompt es obligatorio para la orquestación");
   }
 
-  const memoryNode = new MemoryNode();
-  const conversationId = "default-conversation";
   const availableAgents = agents.filter((agent) =>
     nodes.some((node: { id: string }) => node.id.includes(agent.id)),
   );
-
-  memoryNode.saveMessage(conversationId, {
-    role: "user",
-    content: prompt,
-    timestamp: Date.now(),
-  });
 
   const decision = await runOrchestrator({
     prompt: normalizedPrompt,
     context,
     availableAgents: availableAgents,
-  });
-
-  memoryNode.saveMessage(conversationId, {
-    role: "model",
-    content: JSON.stringify(decision),
-    timestamp: Date.now(),
   });
 
   return ensureValidDecision(decision, availableAgents);

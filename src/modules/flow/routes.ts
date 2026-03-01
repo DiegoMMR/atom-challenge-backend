@@ -1,8 +1,10 @@
 import { FlowRunRequest, FlowUpdateRequest } from "../../types/flow";
 import { FastifyPluginAsync } from "fastify";
 import { FlowController } from "./controller";
+import { MemoryNode } from "../../services/nodes/memoryNode";
 
 const flowController = new FlowController();
+const memoryNode = new MemoryNode();
 
 export const flowRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get("/", async (request, reply) => {
@@ -39,8 +41,22 @@ export const flowRoutes: FastifyPluginAsync = async (fastify) => {
       const body = request.body as FlowRunRequest;
       const flowId = body.id;
       const input = body.input;
+      const conversationId = "default-conversation";
+
+      memoryNode.saveMessage(conversationId, {
+        role: "user",
+        content: input,
+        timestamp: Date.now(),
+      });
 
       const response = await flowController.runFlow(flowId, input);
+
+      memoryNode.saveMessage(conversationId, {
+        role: "model",
+        content: response.finalOutput,
+        timestamp: Date.now(),
+      });
+
       return reply.send(response);
     } catch (error) {
       request.log.error(error, "Error handling flow run route");
