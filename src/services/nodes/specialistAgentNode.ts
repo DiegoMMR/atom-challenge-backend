@@ -1,7 +1,10 @@
 import { runSpecialAgent } from "../agents/specialAgent";
 import { MemoryNode } from "./memoryNode";
 
-export const handleSpecialAgent = async (prompt: string, context?: string) => {
+export const handleSpecialistAgent = async (
+  prompt: string,
+  context?: string,
+) => {
   try {
     const memoryNode = new MemoryNode();
     const conversationId = "default-conversation";

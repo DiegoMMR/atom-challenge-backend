@@ -1,9 +1,21 @@
 import { FlowService } from "./service";
+import { FlowConfig, NodeType } from "../../types/flow";
+
+// nodes handlers
+import { handleGenericAgent } from "../../services/nodes/genericAgentNode";
+import { handleSpecialistAgent } from "../../services/nodes/specialistAgentNode";
+import { handleValidatorAgent } from "../../services/nodes/validatorAgentNode";
 
 export class FlowController {
   private service = new FlowService();
 
-  async createFlow(data: any) {
+  getHandler = (type: NodeType): any => {
+    if (type === "generic") return handleGenericAgent;
+    if (type === "specialist") return handleSpecialistAgent;
+    if (type === "validator") return handleValidatorAgent;
+  };
+
+  async createFlow(data: FlowConfig) {
     try {
       const flowData = data;
       const result = await this.service.createFlow(flowData);
@@ -23,7 +35,7 @@ export class FlowController {
     }
   }
 
-  async updateFlow(id: string, updateData: any) {
+  async updateFlow(id: string, updateData: FlowConfig) {
     try {
       const flowId = id;
       await this.service.updateFlow(flowId, updateData);

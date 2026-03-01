@@ -1,11 +1,37 @@
-export interface FlowNode {
+export type NodeType =
+  | "memory"
+  | "orchestrator"
+  | "validator"
+  | "specialist"
+  | "generic"
+  | "init"
+  | "end";
+
+export interface NodePort {
   id: string;
-  type:
-    | "memory"
-    | "orchestrator"
-    | "validator"
-    | "specialist"
-    | "generic"
-    | "tool";
-  config: Record<string, any>;
+  schemaRef?: string;
+}
+
+export interface NodePorts {
+  in: NodePort[];
+  out: NodePort[];
+}
+
+export interface NodePosition {
+  x: number;
+  y: number;
+}
+
+export interface INodeConfig {
+  id: string;
+  typeNode: NodeType;
+  type: any;
+  label?: string;
+  position: NodePosition;
+  ports: NodePorts;
+  config?: Record<string, any>;
+}
+
+export interface FlowConfig {
+  nodes: INodeConfig[];
 }
