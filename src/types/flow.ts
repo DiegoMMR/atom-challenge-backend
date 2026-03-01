@@ -15,6 +15,7 @@ export interface NodePort {
 export interface NodePorts {
   in: NodePort[];
   out: NodePort[];
+  memory?: NodePort[];
 }
 
 export interface NodePosition {
@@ -32,9 +33,7 @@ export interface INodeConfig {
   config?: Record<string, any>;
 }
 
-export interface FlowConfig {
-  nodes: INodeConfig[];
-}
+export type FlowConfig = INodeConfig[];
 
 export interface FlowUpdateRequest {
   id: string;
@@ -44,4 +43,22 @@ export interface FlowUpdateRequest {
 export interface FlowRunRequest {
   id: string;
   input: string;
+}
+
+export interface FlowExecutionStep {
+  nodeId: string;
+  nodeType: NodeType;
+  input: string;
+  output?: string;
+  selectedAgent?: string;
+  nextNodeId?: string;
+}
+
+export interface FlowRunResponse {
+  success: boolean;
+  flowId: string;
+  stoppedAt: string;
+  executedNodes: string[];
+  finalOutput: string;
+  trace: FlowExecutionStep[];
 }

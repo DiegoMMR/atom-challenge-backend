@@ -46,7 +46,7 @@ export const flowRoutes: FastifyPluginAsync = async (fastify) => {
       request.log.error(error, "Error handling flow run route");
       return reply
         .status(500)
-        .send({ error: "Failed to handle flow update route" });
+        .send({ error: "Failed to handle flow run route" });
     }
   });
 };

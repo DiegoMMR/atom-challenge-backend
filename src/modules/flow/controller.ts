@@ -1,5 +1,12 @@
 import { FlowService } from "./service";
-import { FlowConfig, NodeType } from "../../types/flow";
+import {
+  FlowConfig,
+  FlowExecutionStep,
+  FlowRunResponse,
+  INodeConfig,
+  NodeType,
+} from "../../types/flow";
+import { OrchestratorNodeOutput } from "../../services/nodes/orchestratorNode";
 
 // nodes handlers
 import { handleGenericAgent } from "../../services/nodes/genericAgentNode";
@@ -52,9 +59,156 @@ export class FlowController {
       const flowId = id;
       const flow = await this.service.getFlow(flowId);
 
-      return { message: "Flow execution started", flow };
+      if (!flow?.length) {
+        throw new Error("Flow sin nodos");
+      }
+
+      const initNodes = flow.filter((node) => node.typeNode === "init");
+      if (initNodes.length !== 1) {
+        throw new Error("El flow debe tener exactamente un nodo init");
+      }
+
+      const nodeMap = new Map<string, INodeConfig>(
+        flow.map((node) => [node.id, node]),
+      );
+
+      const trace: FlowExecutionStep[] = [];
+      const executedNodes: string[] = [];
+      const visitedNodes = new Set<string>();
+
+      let currentNode: INodeConfig = initNodes[0];
+      let currentInput = input;
+      let finalOutput = input;
+
+      const maxSteps = Math.max(flow.length * 3, 10);
+      let stepCount = 0;
+
+      while (stepCount < maxSteps) {
+        stepCount += 1;
+
+        if (visitedNodes.has(currentNode.id)) {
+          throw new Error(`Ciclo detectado en nodo ${currentNode.id}`);
+        }
+
+        visitedNodes.add(currentNode.id);
+        executedNodes.push(currentNode.id);
+
+        if (currentNode.typeNode === "end") {
+          trace.push({
+            nodeId: currentNode.id,
+            nodeType: currentNode.typeNode,
+            input: currentInput,
+            output: finalOutput,
+          });
+
+          const result: FlowRunResponse = {
+            success: true,
+            flowId,
+            stoppedAt: currentNode.id,
+            executedNodes,
+            finalOutput,
+            trace,
+          };
+
+          return result;
+        }
+
+        const nextCandidates = (currentNode.ports.out || [])
+          .map((port) => nodeMap.get(port.id))
+          .filter((node): node is INodeConfig => Boolean(node));
+
+        if (
+          (currentNode.ports.out || []).length > 0 &&
+          nextCandidates.length === 0
+        ) {
+          throw new Error(
+            `El nodo ${currentNode.id} tiene salidas inválidas (destinos no encontrados)`,
+          );
+        }
+
+        if (currentNode.typeNode === "init") {
+          const nextNode = nextCandidates[0];
+
+          if (!nextNode) {
+            throw new Error("El nodo init no tiene una salida válida");
+          }
+
+          trace.push({
+            nodeId: currentNode.id,
+            nodeType: currentNode.typeNode,
+            input: currentInput,
+            output: currentInput,
+            nextNodeId: nextNode.id,
+          });
+
+          currentNode = nextNode;
+          continue;
+        }
+
+        const handler = this.getHandler(currentNode.typeNode);
+        if (!handler) {
+          throw new Error(
+            `No existe handler para el nodo ${currentNode.typeNode}`,
+          );
+        }
+
+        if (currentNode.typeNode === "orchestrator") {
+          const decision = (await handler({
+            prompt: currentInput,
+            nodes: nextCandidates.map((node) => ({ id: node.id })),
+          })) as OrchestratorNodeOutput;
+
+          const selectedType = decision.selectedAgent as NodeType;
+          const selectedNode = nextCandidates.find(
+            (node) => node.typeNode === selectedType,
+          );
+
+          if (!selectedNode) {
+            throw new Error(
+              `El orchestrator seleccionó '${decision.selectedAgent}' pero no hay nodo destino compatible`,
+            );
+          }
+
+          const serializedDecision = JSON.stringify(decision);
+
+          trace.push({
+            nodeId: currentNode.id,
+            nodeType: currentNode.typeNode,
+            input: currentInput,
+            output: serializedDecision,
+            selectedAgent: decision.selectedAgent,
+            nextNodeId: selectedNode.id,
+          });
+
+          currentNode = selectedNode;
+          continue;
+        }
+
+        const output = (await handler(currentInput)) as string;
+        finalOutput = output;
+
+        const nextNode = nextCandidates[0];
+        trace.push({
+          nodeId: currentNode.id,
+          nodeType: currentNode.typeNode,
+          input: currentInput,
+          output,
+          nextNodeId: nextNode?.id,
+        });
+
+        if (!nextNode) {
+          throw new Error(
+            `El nodo ${currentNode.id} no tiene salida hacia el nodo end`,
+          );
+        }
+
+        currentInput = output;
+        currentNode = nextNode;
+      }
+
+      throw new Error("Se alcanzó el límite máximo de pasos del flujo");
     } catch (error) {
-      throw new Error("Failed to run flow");
+      throw new Error(`Failed to run flow: ${(error as Error).message}`);
     }
   }
 }
