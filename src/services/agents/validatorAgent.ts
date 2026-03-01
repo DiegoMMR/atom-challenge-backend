@@ -23,9 +23,6 @@ Reglas importantes:
 - No consultes herramientas.
 - Solo recopila los datos requeridos según la intención detectada.
 - Si falta información, pregunta únicamente lo que falta.
-- Si todos los datos están completos, responde únicamente con:
-  "DATOS_COMPLETOS"
-  seguido del objeto JSON con los datos recopilados.
 
 Casos de uso y datos requeridos:
 
