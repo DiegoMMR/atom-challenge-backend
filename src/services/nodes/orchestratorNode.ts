@@ -28,26 +28,7 @@ const agents: AgentDefinition[] = [
     description: "Gestiona saludos o mensajes fuera de alcance",
     handles: ["hola", "gracias", "adiós"]
   }
-]
-
-const systemPrompt = `
-Eres un Orquestador de IA.
-
-Tu tarea es seleccionar qué agente debe manejar la solicitud del usuario.
-
-Debes:
-- Analizar el mensaje del usuario
-- Considerar el contexto de la conversación
-- Elegir SOLO UN agente de la lista
-- Devolver solo JSON
-
-Formato de salida:
-{
-  "selectedAgent": string,
-  "reason": string,
-  "confidence": number
-}
-`
+];
 
 const ensureValidDecision = (
   decision: OrchestratorNodeOutput,
@@ -86,13 +67,9 @@ export const orchestrator = async ({
     throw new Error("El prompt es obligatorio para la orquestación");
   }
 
-  const mergedContext = context
-    ? `${systemPrompt.trim()}\n\nContexto de la conversación:\n${context}`
-    : systemPrompt.trim();
-
   const decision = await runOrchestrator({
     prompt: normalizedPrompt,
-    context: mergedContext,
+    context,
     availableAgents: agents
   });
 

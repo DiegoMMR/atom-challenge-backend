@@ -3,9 +3,11 @@ import { genkit, z } from 'genkit'
 
 import { AgentDefinition } from '../../types/agent'
 
+const MODEL_NAME = 'gemini-2.5-flash'
+
 const ai = genkit({
   plugins: [googleAI()],
-  model: googleAI.model('gemini-2.5-flash', {
+  model: googleAI.model(MODEL_NAME, {
     temperature: 0.2
   })
 })
@@ -39,11 +41,7 @@ type RunOrchestratorInput = {
   availableAgents: AgentDefinition[]
 }
 
-function buildPrompt({
-  prompt,
-  context,
-  availableAgents
-}: RunOrchestratorInput): string {
+function generateSystemPrompt(availableAgents: AgentDefinition[]): string {
   const agentsList = availableAgents
     .map((agent) => {
       const handles = agent.handles.join(', ')
@@ -62,13 +60,7 @@ Reglas:
 - Devuelve una salida estructurada que cumpla con el esquema requerido.
 
 Agentes disponibles:
-${agentsList}
-
-Contexto de la conversación:
-${context || 'ninguno'}
-
-Mensaje del usuario:
-${prompt}`
+${agentsList}`
 }
 
 const orchestratorFlow = ai.defineFlow(
@@ -78,8 +70,14 @@ const orchestratorFlow = ai.defineFlow(
     outputSchema: OrchestratorOutputSchema
   },
   async (input) => {
+    let userPrompt = `Mensaje del usuario:\n${input.prompt}`
+    if (input.context) {
+      userPrompt = `Contexto de la conversación:\n${input.context}\n\n${userPrompt}`
+    }
+
     const { output } = await ai.generate({
-      prompt: buildPrompt(input),
+      system: generateSystemPrompt(input.availableAgents),
+      prompt: userPrompt,
       output: { schema: OrchestratorOutputSchema }
     })
 
