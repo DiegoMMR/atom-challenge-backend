@@ -1,7 +1,10 @@
-import { runSpecialAgent } from "../agents/specialAgent";
+import { runValidatorAgent } from "../agents/validatorAgent";
 import { MemoryNode } from "./memoryNode";
 
-export const handleSpecialAgent = async (prompt: string, context?: string) => {
+export const handleValidatorAgent = async (
+  prompt: string,
+  context?: string,
+) => {
   try {
     const memoryNode = new MemoryNode();
     const conversationId = "default-conversation";
@@ -12,7 +15,7 @@ export const handleSpecialAgent = async (prompt: string, context?: string) => {
       timestamp: Date.now(),
     });
 
-    const response = await runSpecialAgent(prompt, context);
+    const response = await runValidatorAgent(prompt, context);
     memoryNode.saveMessage(conversationId, {
       role: "model",
       content: response,
@@ -20,7 +23,7 @@ export const handleSpecialAgent = async (prompt: string, context?: string) => {
     });
     return response;
   } catch (error) {
-    console.error("Error en el agente especializado:", error);
-    return "Lo siento, no pude obtener la información que necesitas en este momento.";
+    console.error("Error en el agente validador:", error);
+    return "Lo siento, no pude validar la información que necesitas en este momento.";
   }
 };

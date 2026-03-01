@@ -1,5 +1,5 @@
 export interface AgentDefinition {
-  id: string
-  description: string
-  handles: string[]
+  id: string;
+  description: string;
+  handles: string[];
 }

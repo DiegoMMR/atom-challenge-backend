@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { orchestrator } from '../../services/nodes/orchestratorNode';
 import { handleSpecialAgent } from '../../services/nodes/specialAgentNode';
+import { handleGenericAgent } from '../../services/nodes/genericAgentNode';
 
 interface OrchestratorTestBody {
   prompt: string;
@@ -61,5 +62,23 @@ export const testRoutes: FastifyPluginAsync = async (fastify) => {
       request.log.error(error, 'Error handling FAQ test route');
       return reply.status(500).send({ error: 'No se pudo ejecutar el agente especializado' });
     }
+  });
+
+  fastify.post<{ Body: OrchestratorTestBody }>('/generic', async (request, reply) => {
+    try {
+      const { prompt, context } = request.body;
+      if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
+        return reply.status(400).send({ error: 'El campo prompt es obligatorio' });
+      }
+
+      const response = await handleGenericAgent(prompt, context);
+      return reply.send({
+        input: { prompt, context },
+        output: response,
+      });
+    } catch (error) {
+      request.log.error(error, 'Error handling generic agent test route');
+      return reply.status(500).send({ error: 'No se pudo ejecutar el agente genérico' });
+    } 
   });
 };

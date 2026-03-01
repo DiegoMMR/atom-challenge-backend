@@ -19,22 +19,25 @@ export class FaqRepository implements IFaqRepository {
     }
 
     const keyword = topic.toLowerCase();
-    
-    const filteredFaqs = faqData.map(category => {
-      if (category.categoria.toLowerCase().includes(keyword)) {
-        return category; // Si coincide con la categoría entera, devolvemos todo
-      }
-      
-      const filteredQuestions = category.preguntas.filter(q => 
-        q.pregunta.toLowerCase().includes(keyword) || 
-        q.respuesta.toLowerCase().includes(keyword)
-      );
 
-      return {
-        ...category,
-        preguntas: filteredQuestions
-      };
-    }).filter(category => category.preguntas.length > 0); // Removemos categorías vacías tras el filtro
+    const filteredFaqs = faqData
+      .map((category) => {
+        if (category.categoria.toLowerCase().includes(keyword)) {
+          return category; // Si coincide con la categoría entera, devolvemos todo
+        }
+
+        const filteredQuestions = category.preguntas.filter(
+          (q) =>
+            q.pregunta.toLowerCase().includes(keyword) ||
+            q.respuesta.toLowerCase().includes(keyword),
+        );
+
+        return {
+          ...category,
+          preguntas: filteredQuestions,
+        };
+      })
+      .filter((category) => category.preguntas.length > 0); // Removemos categorías vacías tras el filtro
 
     return filteredFaqs;
   }

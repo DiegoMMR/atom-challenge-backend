@@ -1,7 +1,7 @@
-import { runSpecialAgent } from "../agents/specialAgent";
+import { runGenericAgent } from "../agents/genericAgent";
 import { MemoryNode } from "./memoryNode";
 
-export const handleSpecialAgent = async (prompt: string, context?: string) => {
+export const handleGenericAgent = async (prompt: string, context?: string) => {
   try {
     const memoryNode = new MemoryNode();
     const conversationId = "default-conversation";
@@ -12,15 +12,17 @@ export const handleSpecialAgent = async (prompt: string, context?: string) => {
       timestamp: Date.now(),
     });
 
-    const response = await runSpecialAgent(prompt, context);
+    const response = await runGenericAgent(prompt, context);
+
     memoryNode.saveMessage(conversationId, {
       role: "model",
       content: response,
       timestamp: Date.now(),
     });
+
     return response;
   } catch (error) {
-    console.error("Error en el agente especializado:", error);
+    console.error("Error en el agente genérico:", error);
     return "Lo siento, no pude obtener la información que necesitas en este momento.";
   }
 };
