@@ -1,12 +1,12 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 export const env = {
-  PORT: parseInt(process.env.PORT || '3000', 10),
+  PORT: parseInt(process.env.PORT || "3000", 10),
 
   ALLOW_ORIGIN: process.env.ALLOW_ORIGIN!,
-  GEMINI_API_KEY: process.env.GEMINI_API_KEY!,
-  GEMINI_MODEL: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
+  OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4o-mini",
 
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID!,
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL!,

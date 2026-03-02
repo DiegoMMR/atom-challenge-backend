@@ -1,17 +1,15 @@
-import { googleAI } from "@genkit-ai/google-genai";
+import openAI from "@genkit-ai/compat-oai";
 import { genkit, z } from "genkit";
 
 import { AgentDefinition } from "../../types/agent";
 import { Message } from "../../types/memory";
 import { env } from "../../config/envConfig";
 
-const MODEL_NAME = env.GEMINI_MODEL;
+const MODEL_NAME = env.OPENAI_MODEL;
 
 const ai = genkit({
-  plugins: [googleAI()],
-  model: googleAI.model(MODEL_NAME, {
-    temperature: 0.2,
-  }),
+  plugins: [openAI({ name: "openai", apiKey: env.OPENAI_API_KEY })],
+  model: `openai/${MODEL_NAME}`,
 });
 
 const AgentSchema = z.object({
@@ -100,6 +98,9 @@ const orchestratorFlow = ai.defineFlow(
     const { output } = await ai.generate({
       system: generateSystemPrompt(input.availableAgents),
       prompt: userPrompt,
+      config: {
+        temperature: 0.2,
+      },
       output: { schema: OrchestratorOutputSchema },
       ...(input.messages
         ? {

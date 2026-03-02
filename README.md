@@ -4,6 +4,15 @@
 
 Configura un archivo `.env` en la raíz del proyecto con estas variables:
 
+- `PORT`
+- `ALLOW_ORIGIN`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL` (opcional, default: `gpt-4o-mini`)
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY`
+- `TELEGRAM_BOT_TOKEN`
+
 ## Ejecutar servidor
 
 ```bash

@@ -1,15 +1,13 @@
-import { googleAI } from "@genkit-ai/google-genai";
+import openAI from "@genkit-ai/compat-oai";
 import { genkit, z } from "genkit";
 import { Message } from "../../types/memory";
 import { env } from "../../config/envConfig";
 
-const MODEL_NAME = env.GEMINI_MODEL;
+const MODEL_NAME = env.OPENAI_MODEL;
 
 const ai = genkit({
-  plugins: [googleAI()],
-  model: googleAI.model(MODEL_NAME, {
-    temperature: 0.2,
-  }),
+  plugins: [openAI({ name: "openai", apiKey: env.OPENAI_API_KEY })],
+  model: `openai/${MODEL_NAME}`,
 });
 
 const systemPrompt = `
@@ -81,6 +79,9 @@ export const validatorAgent = ai.defineFlow(
     const { text } = await ai.generate({
       prompt: userPrompt,
       system: systemPrompt,
+      config: {
+        temperature: 0.2,
+      },
       ...(input.messages
         ? {
             messages: input.messages.map((msg) => ({
