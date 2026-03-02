@@ -27,7 +27,8 @@ const agents: AgentDefinition[] = [
   },
   {
     id: "specialist",
-    description: "Gestiona consultas del catálogo de vehículos",
+    description:
+      "Gestiona consultas del catálogo de vehículos, horarios y disponibilidad, y ubicaciones",
     handles: ["autos", "precios", "disponibilidad", "SUV", "sedán"],
   },
   {

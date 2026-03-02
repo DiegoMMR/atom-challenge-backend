@@ -34,19 +34,12 @@ Casos de uso y datos requeridos:
 2) Catálogo de Vehículos:
 - Presupuesto aproximado
 - Nuevo o usado
-- ¿Cuenta con descuento de empleado?
 - Tipo de vehículo preferido (sedán, SUV, pickup, etc.)
 
 3) Agendamiento de Cita:
 - Nombre completo
 - Fecha preferida
 - Hora preferida
-- Motivo de la cita (prueba de manejo o asesoría)
-- Vehículo de interés (opcional)
-
-Si el usuario cambia de intención, reinicia la recopilación de datos.
-
-Responde de forma clara y estructurada.
 `;
 
 export const validatorAgent = ai.defineFlow(

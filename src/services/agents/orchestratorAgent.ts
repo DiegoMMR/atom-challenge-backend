@@ -78,6 +78,7 @@ Reglas:
 - Analiza el mensaje del usuario.
 - Considera el contexto de la conversación.
 - Elige SOLO un agente de la lista disponible.
+- Usa 'validator' únicamente cuando falten datos requeridos para continuar.
 - Devuelve una salida estructurada que cumpla con el esquema requerido.
 
 Agentes disponibles:
