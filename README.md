@@ -23,3 +23,5 @@ pnpm dev
 Servidor por defecto: `http://localhost:3000`
 
 live site https://atom-day.mr-diego.dev/
+
+Elegimos fastify por su experiencia de desarollo, rendimiento y que posee plugins para poder ser transformado en serverless si es necesario
