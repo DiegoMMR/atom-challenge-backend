@@ -5,14 +5,35 @@ import { Faq } from "../../types/faq";
 export class FaqService {
   constructor(private faqRepository: IFaqRepository) {}
 
+  private countQuestions(faqs: Faq[]): number {
+    return faqs.reduce(
+      (count, category) => count + category.preguntas.length,
+      0,
+    );
+  }
+
   async fetchFaq(topic?: string): Promise<Faq[]> {
+    const allFaqs = await this.faqRepository.getFaqs();
+
+    if (!topic || !topic.trim()) {
+      return allFaqs;
+    }
+
     const faqs = await this.faqRepository.getFaqs(topic);
 
     if (!faqs || faqs.length === 0) {
       console.warn(
-        `[FaqService] No se encontraron FAQs para el tema: "${topic || "general"}".`,
+        `[FaqService] No se encontraron FAQs para el tema: "${topic}". Devolviendo FAQ completa como contexto.`,
       );
-      return [];
+      return allFaqs;
+    }
+
+    const filteredQuestionCount = this.countQuestions(faqs);
+    if (filteredQuestionCount < 3) {
+      console.warn(
+        `[FaqService] El filtro por tema "${topic}" devolvió poco contexto (${filteredQuestionCount} preguntas). Devolviendo FAQ completa.`,
+      );
+      return allFaqs;
     }
 
     return faqs;
@@ -31,8 +52,9 @@ export const faqTool = (ai: Genkit) =>
       inputSchema: z.object({
         topic: z
           .string()
+          .optional()
           .describe(
-            'El tema corto o palabra clave de la consulta recibida (ej. "horarios", "precios", "ubicacion").',
+            'Tema corto o palabra clave de la consulta (ej. "horarios", "precios", "ubicacion"). Si no se envía, devuelve la FAQ completa.',
           ),
       }),
       outputSchema: z

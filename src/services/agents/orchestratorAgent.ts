@@ -70,6 +70,8 @@ function generateSystemPrompt(availableAgents: AgentDefinition[]): string {
 
   return `Eres un Orquestador de IA.
 
+  para una empresa de venta de vehículos. Tu tarea es analizar el mensaje del usuario y decidir qué agente es el más adecuado para manejar la solicitud, basándote en el contenido del mensaje y el contexto de la conversación.
+
 Tu tarea es seleccionar exactamente un agente para manejar la solicitud del usuario.
 
 Reglas:
